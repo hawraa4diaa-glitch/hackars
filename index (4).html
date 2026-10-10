@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حظ أوفر</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@900&family=Share+Tech+Mono&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Tajawal', 'Share Tech Mono', monospace;
+        }
+
+        /* Matrix Canvas */
+        #matrixCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: block;
+        }
+
+        /* Scanlines Overlay */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.35),
+                rgba(0, 0, 0, 0.35) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+        }
+
+        /* Hacker Glow & Glitch Text */
+        .hacker-text {
+            position: relative;
+            z-index: 3;
+            color: #00ff66;
+            text-shadow: 
+                0 0 10px #00ff66,
+                0 0 20px #00ff66,
+                0 0 40px #00cc44,
+                0 0 80px #009933;
+            animation: glitchPulse 3s infinite alternate, flicker 0.15s infinite;
+            user-select: none;
+        }
+
+        /* Text Glitch Effect */
+        @keyframes glitchPulse {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 40px #00cc44;
+            }
+            50% {
+                transform: scale(1.02);
+                text-shadow: 0 0 15px #00ff66, 0 0 30px #00ff66, 0 0 60px #00ff66;
+            }
+            100% {
+                transform: scale(1);
+                text-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 40px #00cc44;
+            }
+        }
+
+        /* Slight Matrix CRT Flickering */
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            100% { opacity: 0.95; }
+        }
+
+        /* Red warning subtle frame vignetting */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.95);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center h-screen w-screen relative bg-black">
+
+    <!-- Matrix Code Rain Canvas -->
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- CRT Scanlines and Vignette Effects -->
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <!-- Center Hacker Text -->
+    <div class="flex justify-center items-center w-full h-full">
+        <h1 class="hacker-text text-6xl sm:text-8xl md:text-9xl lg:text-[12rem] font-black tracking-wider text-center px-4">
+            حظ أوفر
+        </h1>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Matrix character set (Katakana, English, Numbers, Binary)
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const nums = '01';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 18;
+        let columns = Math.floor(canvas.width / fontSize);
+        let rainDrops = Array(columns).fill(1);
+
+        // Reset droplets if screen resizes
+        window.addEventListener('resize', () => {
+            columns = Math.floor(canvas.width / fontSize);
+            rainDrops = Array(columns).fill(1);
+        });
+
+        function drawMatrix() {
+            // Translucent black background to leave trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                // Random character selection
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                
+                // Leading character brightness (light green/white)
+                if (Math.random() > 0.9) {
+                    ctx.fillStyle = '#b3ffcc';
+                } else {
+                    ctx.fillStyle = '#00ff66';
+                }
+
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                // Reset drop to top with randomized delay
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        }
+
+        // Run matrix animation at regular pace
+        setInterval(drawMatrix, 33);
+    </script>
+</body>
+</html>
